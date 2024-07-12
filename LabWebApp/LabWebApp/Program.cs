@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 using LabWebApp.Data;
+using System.Security.Claims;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -14,7 +15,22 @@ builder.Services.AddDbContext<ApplicationDbContext>(options =>
 builder.Services.AddDefaultIdentity<IdentityUser>(options => options.SignIn.RequireConfirmedAccount = true)
     .AddEntityFrameworkStores<ApplicationDbContext>();
 
-builder.Services.AddDefaultIdentity<IdentityUser>().AddEntityFrameworkStores<ApplicationDbContext>();
+builder.Services.AddAuthentication()
+    .AddGitHub(o =>
+    {
+        o.ClientId = builder.Configuration["Authentication:GitHub:ClientId"];
+        o.ClientSecret = builder.Configuration["Authentication:GitHub:ClientSecret"];
+        o.CallbackPath = "/signin-github";
+        o.Scope.Add("read:user");
+        o.Events.OnCreatingTicket = context =>
+        {
+            if (context.AccessToken is { })
+            {
+                context.Identity?.AddClaim(new Claim("access_token", context.AccessToken));
+            }
+            return Task.CompletedTask;
+        };
+    });
 
 builder.Services.AddControllersWithViews();
 

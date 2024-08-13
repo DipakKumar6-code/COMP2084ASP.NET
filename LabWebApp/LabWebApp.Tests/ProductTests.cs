@@ -60,5 +60,16 @@ namespace LabWebApp.Tests
             // Assert
             Assert.Equal("$49.99", formattedPrice);  
         }
+
+        [Fact]
+        public void Calculate_VolumeOfCylinder()
+        {
+            double r = 3.2;
+            double h = 7.1;
+            double volume = 3.141 * r * r * h;
+            volume = Math.Round(volume, 2);
+            double expectedVolume = 228.36;
+            Assert.Equal(expectedVolume, volume);
+        }
     }
 }
